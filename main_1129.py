@@ -97,7 +97,7 @@ def plot(a,f):
     #draw vertices
     while degree<360:
 
-        if n[index]==0:
+        if f[index]==0:
             turtle.color('blue')
         else:
             turtle.color('red')
