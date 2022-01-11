@@ -7,7 +7,7 @@ import qiskit
 from qiskit import QuantumCircuit, execute, Aer
 from qiskit.aqua.algorithms import Grover
 from qiskit.aqua.components.oracles import TruthTableOracle
- 
+
 def check_input(N, nearest_connect, farthest_connect):
     if(nearest_connect <= 0 or farthest_connect <= 0 or N <= 0):
         print('error: nearest_connect should bigger than 0')
@@ -68,18 +68,29 @@ def is_any_one(low_idx,high_idx,f):
 
 def is_any_one_quantum(low_idx,high_idx,f):
     
-    output_str = ndarray2str(f[low_idx:high_idx+1])
+    doubled_f = np.concatenate((f,f))
+    output_str = ndarray2str(doubled_f[low_idx:high_idx+1])
+    original_output_str_len = len(output_str)
+    
+    if original_output_str_len == 1:
+        return doubled_f[low_idx]
+    
     power = math.ceil(math.log(len(output_str),2))
-    # continue from here
+    if pow(2,power) > len(output_str):
+        output_str = output_str + '0'*(pow(2,power)-len(output_str))
+        
     oracle = TruthTableOracle(output_str)
     grover = Grover(oracle)
     simulator = Aer.get_backend('qasm_simulator')
     result = grover.run(simulator,shots=1)
     counts = result['measurement']
     for i in counts:
-        measurement_outcome = i
-    measured_idx = int(measurement_outcome,2) + low_idx
-    return int(f[measured_idx])
+        measurement_outcome = int(i,2)
+    if measurement_outcome > original_output_str_len - 1:
+        return 0
+    else:
+        measured_idx = measurement_outcome + low_idx
+        return int(doubled_f[measured_idx])
 
 def ndarray2str(ndarray):
     string = ''
@@ -147,10 +158,10 @@ def plot(a,f):
     turtle.mainloop()
 
 # command line parameters
-N = 32
-nearest_connect = 3 #0 < lower < upper <= N/2
-farthest_connect = 5
-prob = 0.4
+N = 30
+nearest_connect = 8 #0 < lower < upper <= N/2
+farthest_connect = 10
+prob = 0.3
 
 if __name__ == '__main__':
 
@@ -166,6 +177,7 @@ if __name__ == '__main__':
     if(farthest_connect != nearest_connect):
         chunk_size = farthest_connect - nearest_connect
         is_collision_in_chunk_arr = np.zeros(math.ceil(N/chunk_size))
+        is_collision_in_chunk_arr_quantum = np.zeros(math.ceil(N/chunk_size))
         
         for i in range(math.ceil(N/chunk_size)):
             min_idx_in_chunk = chunk_size * i
@@ -178,17 +190,25 @@ if __name__ == '__main__':
 
             connect_low_idx = min_one_idx_in_chunk + nearest_connect
             connect_high_idx = max_one_idx_in_chunk + farthest_connect
-
+            
             is_collision_in_chunk_arr[i] = is_any_one(connect_low_idx,connect_high_idx,f)
+            is_collision_in_chunk_arr_quantum[i] = is_any_one_quantum(connect_low_idx,connect_high_idx,f)
 
-        is_collision_var = is_any_one_quantum(0,len(is_collision_in_chunk_arr)-1,is_collision_in_chunk_arr)
+        is_collision_var = is_any_one(0,len(is_collision_in_chunk_arr)-1,is_collision_in_chunk_arr)
+        is_collision_var_quantum = is_any_one_quantum(0,len(is_collision_in_chunk_arr_quantum)-1,is_collision_in_chunk_arr_quantum)
     else:
         is_collision_in_chunk_arr = np.zeros(N)
         for i in range(N):
             connect_low_idx = i + nearest_connect
             connect_high_idx = i + farthest_connect
             if(f[i]):
-                is_collision_in_chunk_arr[i] = is_any_one(connect_low_idx, connect_high_idx,f)
+                is_collision_in_chunk_arr[i] = is_any_one_quantum(connect_low_idx, connect_high_idx,f)
 
-        is_collision_var = is_any_one(0,len(is_collision_in_chunk_arr)-1,is_collision_in_chunk_arr)
-    print(is_collision_var)
+        is_collision_var = is_any_one_quantum(0,len(is_collision_in_chunk_arr)-1,is_collision_in_chunk_arr)
+        
+    if is_collision_var == is_collision_var_quantum:
+        print("correct result")
+    else:
+        print("wrong result")
+    print(is_collision_in_chunk_arr)
+    print(is_collision_in_chunk_arr_quantum)
