@@ -1,0 +1,10 @@
+做完東西後，要座椅下事情
+1. git add .
+2. git commit -m "<你做的事情>"
+3. git pull origin main
+4. git push origin main
+
+做東西之前，要做以下事情
+1. git pull origin main
+
+有問題傳群組
