@@ -1,0 +1,20 @@
+# 通信專題 第 2 組 期末專題
+
+## 如何安裝環境
+1. 到 anaconda prompt 中輸入 conda env create -f environment.yml
+2. activate commlab_final_project_group_2
+
+## 如何執行程式
+1. 在 anaconda prompt 中輸入 jupyter notebook
+2. 在 jupyter notebook 中打開 collision.ipynb (experiment.ipynb 為我們做實驗的程式)
+3. 點擊 Kernel／Restart & Run All 即可跑程式碼
+
+## 可調參數
+1. N：頂點數目
+2. nearest_connect、farthest_connect：每個頂點最近和最遠相鄰頂點距離，其中 0 < nearest connect <= farthest connect <= N_2
+3. itr：量子演算法重複執行幾次，重複越多次正確率越高，但是時間也花越久，另外 itr 需要是奇數，因為要避免 0 和 1 的數量相同
+4. prob：每個頂點被標記的機率（為 1 的機率）
+5. state：要在本地端跑（local）還是遠端跑（remote）
+6. token：若要用 IBMQ 遠端跑，需要設定 api token
+7. plot_graph：是否要用 turtle 繪圖程式將 graph 畫出來
+
